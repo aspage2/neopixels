@@ -2,7 +2,14 @@
 .eslintcache
 
 # dependencies
-/node_modules
+color-picker/.eslintcache
+
+__pycache__/
+ledproto/
+scripts/*pb2*.py
+
+# dependencies
+color-picker/node_modules
 /.pnp
 .pnp.js
 

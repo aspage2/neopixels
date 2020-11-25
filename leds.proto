@@ -1,0 +1,43 @@
+
+syntax = "proto3";
+
+option go_package=".;ledproto";
+
+import "google/protobuf/empty.proto";
+
+message SolidPattern {
+    uint32 color = 1;
+}
+
+message StripePattern {
+    int32 stripe_len = 1;
+    repeated uint32 colors = 2;
+}
+
+message SnowflakePattern {
+    float spawn_chance = 1;
+}
+
+message BreathePattern {
+    repeated uint32 colors = 1;
+}
+
+message SetPatternRequest {
+  oneof pattern {
+      SolidPattern solid = 1;
+      StripePattern stripe = 2;
+      SnowflakePattern snowflake = 3;
+      BreathePattern breathe = 4;
+  }
+
+  int32 cross_fade = 5;
+}
+
+message SetColorRequest {
+  uint32 color = 1;
+}
+
+service LedStrip {
+    rpc Set (SetPatternRequest) returns (google.protobuf.Empty);
+    rpc SetRealtime (stream SetColorRequest) returns (google.protobuf.Empty);
+}
