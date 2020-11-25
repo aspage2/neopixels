@@ -1,0 +1,4 @@
+github.com/gerow/go-color v0.0.0-20140219113758-125d37f527f1 h1:DSA78HTfGC442ChonW9NdWuH5rsfJjTwsYwfIZhYjFo=
+github.com/gerow/go-color v0.0.0-20140219113758-125d37f527f1/go.mod h1:uN90NshmoiEU0ECs3cPdEg3wshS8kG9Zez9RmYPuL5A=
+github.com/gorilla/websocket v1.4.2 h1:+/TMaTYc4QFitKJxsQ7Yye35DkWvkdLcvGKqM+x0Ufc=
+github.com/gorilla/websocket v1.4.2/go.mod h1:YR8l580nyteQvAITg2hZ9XVh4b55+EU/adAjf1fMHhE=

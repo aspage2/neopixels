@@ -4,9 +4,11 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+const ws = new WebSocket("ws://localhost:8080/ws");
+
 ReactDOM.render(
   <React.StrictMode>
-    <App />
+    <App ws={ws} />
   </React.StrictMode>,
   document.getElementById('root')
 );
