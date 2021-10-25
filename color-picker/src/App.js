@@ -57,9 +57,39 @@ function useSelectBar(coordPos) {
     }];
 }
 
-function App() {
+function hslToRGB(h, s, l) {
+    // Must be fractions of 1
+    s /= 100;
+    l /= 100;
 
-    const ws = useRef(null);
+    let c = (1 - Math.abs(2 * l - 1)) * s,
+        x = c * (1 - Math.abs((h / 60) % 2 - 1)),
+        m = l - c/2,
+        r = 0,
+        g = 0,
+        b = 0;
+    
+    if (h < 60) {
+        r = c; g = x; b = 0;  
+    } else if (h < 120) {
+        r = x; g = c; b = 0;
+    } else if (h < 180) {
+        r = 0; g = c; b = x;
+    } else if (h < 240) {
+        r = 0; g = x; b = c;
+    } else if (h < 300) {
+        r = x; g = 0; b = c;
+    } else if (h < 360) {
+        r = c; g = 0; b = x;
+    }
+    r = Math.round((r + m) * 255);
+    g = Math.round((g + m) * 255);
+    b = Math.round((b + m) * 255);
+    return [r, g, b];
+    
+}
+
+function App() {
 
     const [hueCoord, hueEventProps, hueOverlayProps] = useSelectBar(0);
     const [satCoord, satEventProps, satOverlayProps] = useSelectBar(500);
@@ -69,17 +99,18 @@ function App() {
     const sat = (100 * satCoord) / 500;
     const light = (100 * lightCoord) / 500;
 
-    useEffect(() => {
-        ws.current = new WebSocket(`ws://192.168.2.24:8080/ws`);
-        return () => {
-            ws.current.close();
-        }
-    }, []);
-
-    useEffect(() => {
-        if (ws.current === null || ws.current.readyState !== WebSocket.OPEN) return
-        ws.current.send(JSON.stringify({h: parseFloat(hue)/360, s: parseFloat(sat)/100, l: parseFloat(light)/100}));
-    }, [ws, hue, sat, light])
+    const sendColor = () => {
+        fetch(
+            "http://192.168.2.3:5000/set/",
+            {
+                method: "POST",
+                body: JSON.stringify({color: hslToRGB(hue, sat, light)}),
+                headers: {
+                    "Content-Type": "application/json",
+                }
+            },
+        );
+    };
 
     return <div className="App">
 
@@ -101,6 +132,7 @@ function App() {
         </div><br/>
         <div className="secret-overlay" {...lightOverlayProps}/>
         <div id="preview" style={{background: `hsl(${hue}, ${sat}%, ${light}%)`}}/>
+        <button id="submit" onClick={sendColor}>Submit</button>
     </div>;
 }
 

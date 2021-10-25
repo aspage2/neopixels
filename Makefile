@@ -1,20 +1,12 @@
+build: bin/ledserver
+.PHONY: build
 
-bin/%: cmd/%/main.go $(wildcard internal/*.go) $(wildcard internal/pattern/*.go) ledproto/leds.pb.go
+bin/ledserver: $(wildcard ledserver/internal/*.go) $(wildcard ledserver/*.go)
 	@mkdir -p bin
-	docker run --rm -it \
+	docker run --rm --platform linux/arm/v7 \
 	-v "$(shell pwd)":/go/src/pnpleds \
 	rpi-leds \
-	/usr/bin/qemu-arm-static /bin/sh -c "go build -o src/pnpleds/bin/$(@F) -v pnpleds/cmd/$(@F)"
-
-upload: $(wildcard bin/*)
-	scp bin/* pi@192.168.2.25:~
-
-proto: ledproto/leds.pb.go
-.PHONY: proto
-
-ledproto/leds.pb.go: leds.proto
-	@mkdir -p ledproto
-	protoc -I. --go_out=ledproto --go-grpc_out=ledproto leds.proto
+	/usr/bin/qemu-arm-static /bin/sh -c "cd /go/src/pnpleds && go build -o bin/ledserver -v ./ledserver"
 
 fmt:
 	goimports -w .
