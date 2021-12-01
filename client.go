@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"flag"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -17,7 +18,17 @@ func Must(v interface{}, err error) interface{} {
 	return v
 }
 
-func colorFromString(arg string) [3]int64 {
+type Color [3]int64
+
+func (c Color) GRB() Color {
+	return Color{
+		c[1],
+		c[0],
+		c[2],
+	}
+}
+
+func colorFromString(arg string) Color {
 	var payload string
 	if strings.HasPrefix(arg, "0x") {
 		if len(arg) != 8 {
@@ -36,57 +47,62 @@ func colorFromString(arg string) [3]int64 {
 		panic(err)
 	}
 
-	return [3]int64{
+	return Color{
 		(val >> 16) & 0xff,
 		(val >> 8) & 0xff,
 		val & 0xff,
 	}
 }
 
-func colorFrom3Parts(args []string) [3]int64 {
-	return [3]int64{
-		Must(strconv.ParseInt(args[0], 10, 64)).(int64),
-		Must(strconv.ParseInt(args[1], 10, 64)).(int64),
-		Must(strconv.ParseInt(args[2], 10, 64)).(int64),
+func Do(payload interface{}) {
+	data := Must(json.Marshal(payload)).([]byte)
+	resp, err := http.Post("http://192.168.2.16/set/", "application/json", bytes.NewReader(data))
+	if err != nil {
+		panic(err)
 	}
-}
-
-func swap(arr []int64, i, j int) {
-	tmp := arr[i]
-	arr[i] = arr[j]
-	arr[j] = tmp
+	resp.Body.Close()
 }
 
 func main() {
 	off := flag.Bool("off", false, "Turn the leds off")
-	mode := flag.String("mode", "grb", "either 'grb' or 'rgb'")
+	mode := flag.String("mode", "solid", "Lighting mode.")
 	flag.Parse()
 
 	if *off {
-		http.Post("http://192.168.2.6:5000/off/", "application/json", bytes.NewReader([]byte("{}")))
+		http.Post("http://192.168.2.16/off/", "application/json", bytes.NewReader([]byte("{}")))
 		return
 	}
 
 	args := flag.Args()
 
-	var color [3]int64
-	if len(args) == 1 {
-		color = colorFromString(args[0])
-	} else if len(args) == 3 {
-		color = colorFrom3Parts(args)
-	} else {
-		panic(errors.New("must provide either color code or 3 args"))
+	if len(args) == 0 {
+		panic(errors.New("no colors"))
 	}
 
-	if *mode == "grb" {
-		swap(color[:], 0, 1)
+	var colors []Color
+	for _, a := range args {
+		colors = append(colors, colorFromString(a))
 	}
 
-	data, _ := json.Marshal(map[string][3]int64{"color": color})
-
-	resp, err := http.Post("http://192.168.2.6:5000/set/", "application/json", bytes.NewReader(data))
-	if err != nil {
-		panic(err)
+	switch *mode {
+	case "solid":
+		if len(colors) > 1 {
+			fmt.Printf("WARN: mode is 'solid', only using %s\n", args[0])
+		}
+		Do(map[string]Color{"solid": colors[0]})
+	case "gradient":
+		if len(colors) <= 1 {
+			panic(errors.New("need 2 colors for gradient"))
+		} else if len(colors) > 2 {
+			fmt.Printf("WARN: mode is 'gradient', only using %s, %s\n", args[0], args[1])
+		}
+		Do(map[string][]Color{"gradient": colors[:2]})
+	case "sequence":
+		if len(colors) == 1 {
+			Do(map[string]Color{"solid": colors[0]})
+		} else {
+			Do(map[string][]Color{"sequence": colors})
+		}
 	}
-	defer resp.Body.Close()
+
 }
