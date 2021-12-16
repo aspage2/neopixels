@@ -101,7 +101,7 @@ function App() {
 
     const sendColor = () => {
         fetch(
-            "http://192.168.2.3:5000/set/",
+            "http://192.168.2.16:5000/set/",
             {
                 method: "POST",
                 body: JSON.stringify({color: hslToRGB(hue, sat, light)}),
