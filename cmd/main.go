@@ -113,10 +113,11 @@ func main() {
 	numPixels := flag.Int("n", 30, "number of leds in the strip")
 	listenHost := flag.String("host", "127.0.0.1", "host ip to listen on")
 	listenPort := flag.Int("port", 4000, "port to listen on")
+	order := flag.String("order", "grb", "color order for leds [rgb, grb]")
 
 	flag.Parse()
 
-	pixels, err := internal.NewStrip(*numPixels, internal.WithPixelOrder(pixarray.GRB))
+	pixels, err := internal.NewStrip(*numPixels, internal.WithPixelOrder(pixarray.StringOrders[*order]))
 	if err != nil {
 		panic(err)
 	}
