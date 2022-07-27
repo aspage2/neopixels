@@ -75,10 +75,6 @@ func main() {
 
 	args := flag.Args()
 
-	if len(args) == 0 {
-		panic(errors.New("no colors"))
-	}
-
 	var colors []Color
 	for _, a := range args {
 		colors = append(colors, colorFromString(a))
@@ -103,6 +99,14 @@ func main() {
 		} else {
 			Do(map[string][]Color{"sequence": colors})
 		}
+	case "merry":
+		R := Color{0xff, 0, 0}
+		G := Color{0, 0xff, 0}
+		B := Color{0, 0, 0xff}
+		V := Color{0xff, 0, 0xff}
+		Y := Color{0xff, 0xff, 0}
+		seq := []Color{G, G, R, G, G, B, G, G, Y, G, G, V}
+		Do(map[string][]Color{"sequence": seq})
 	}
 
 }
