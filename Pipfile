@@ -6,12 +6,6 @@ name = "pypi"
 [packages]
 rpi-ws281x = "*"
 adafruit-circuitpython-neopixel = "*"
-flask = "*"
-opencv-python = "*"
-requests = "*"
-jupyter = "*"
-pillow = "*"
-matplotlib = "*"
 
 [dev-packages]
 

@@ -1,10 +1,13 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 .eslintcache
 
+mnt/
+
 .ipynb_checkpoints
 
 # dependencies
 color-picker/.eslintcache
+color-picker/build
 
 __pycache__/
 ledproto/
