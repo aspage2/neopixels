@@ -47,7 +47,7 @@ type LEDStripWithBrightness struct {
 }
 
 func (s *LEDStripWithBrightness) SetPixel(i int, p pixarray.Pixel) {
-	s.LEDStrip.SetPixel(i, Scale(p, s.Brightness))
+	s.LEDStrip.SetPixel(i, GammaCorrect(Scale(p, s.Brightness)))
 }
 
 func NewStrip(numPixels int, options ...option) (pixarray.LEDStrip, error) {
