@@ -15,9 +15,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-const (
-	HostBase = "http://192.168.0.232:9000/"
-)
+var HostBase string
 
 func Must(v interface{}, err error) interface{} {
 	if err != nil {
@@ -95,6 +93,20 @@ func MakePayload(patternType string, data interface{}) ([]byte, error) {
 
 func main() {
 	app := &cli.App{
+		Flags: []cli.Flag{
+			&cli.StringFlag{
+				Name:  "host",
+				Value: "192.168.0.232",
+			},
+			&cli.StringFlag{
+				Name:  "port",
+				Value: "5000",
+			},
+		},
+		Before: func(ctx *cli.Context) error {
+			HostBase = fmt.Sprintf("http://%s:%s/", ctx.String("host"), ctx.String("port"))
+			return nil
+		},
 		Commands: []*cli.Command{
 			{
 				Name:  "off",
