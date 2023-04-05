@@ -1,141 +1,89 @@
 import './App.css';
-import {useState, useRef, useEffect} from "react";
-import clamp from "lodash/clamp";
+import { GetPattern } from "./pattern";
+import { useLifeSpan } from './hooks';
+import { getStatus, setStatus } from './util';
+import {useState, useEffect} from "react";
+import map from "lodash/map";
+import {useCookies} from "react-cookie"
 
-function useSelectBar(coordPos) {
-    const [coord, setCoord] = useState(coordPos || 0);
-    const ref = useRef();
-    const [mouseDown, setMouseDown] = useState(false);
 
-    const onMouseMove = ev => {
-        if (!mouseDown) {
-            return
-        }
-        const bounds = ref.current.getBoundingClientRect();
-        setCoord(clamp(ev.clientX - bounds.left, 0, 500));
+function FavList({onChoose, onRemove, favs}) {
+    const favItem = (data, i) => {
+        const pattern = GetPattern(data);
+        return <div 
+            className="fav-item" 
+            onClick={()=>onChoose(i)}
+        >
+            <pattern.PreviewBar className="preview" data={data.data} />
+            <button onClick={()=>onRemove(i)}>X</button>
+        </div>
     };
 
-    const onMouseDown = () => {
-        setMouseDown(true);
-    };
-
-    const onMouseUp = () => {
-        setMouseDown(false);
-    }
-
-    const onTouchMove = ev => {
-        if (!mouseDown) {
-            return
-        }
-        console.log("touch move");
-        const bounds = ref.current.getBoundingClientRect();
-        setCoord(clamp(ev.changedTouches[0].clientX - bounds.left, 0, 500));
-    };
-
-    const onTouchStart = ev => {
-        console.log("touch start");
-        console.log(ev)
-        setMouseDown(true);
-    }
-
-    const onTouchEnd = ev => {
-        setMouseDown(false);
-        console.log("touch end");
-        console.log(ev);
-    }
-
-    return [coord, {
-        ref,
-        onMouseDown,
-        onTouchStart,
-    }, {
-        onTouchEnd,
-        onTouchMove,
-        onMouseMove,
-        onMouseUp,
-        style: {display: mouseDown ? 'inline-block' : 'none'}
-    }];
+    return <div>{map(favs, favItem)}</div>
 }
 
-function hslToRGB(h, s, l) {
-    // Must be fractions of 1
-    s /= 100;
-    l /= 100;
-
-    let c = (1 - Math.abs(2 * l - 1)) * s,
-        x = c * (1 - Math.abs((h / 60) % 2 - 1)),
-        m = l - c/2,
-        r = 0,
-        g = 0,
-        b = 0;
-    
-    if (h < 60) {
-        r = c; g = x; b = 0;  
-    } else if (h < 120) {
-        r = x; g = c; b = 0;
-    } else if (h < 180) {
-        r = 0; g = c; b = x;
-    } else if (h < 240) {
-        r = 0; g = x; b = c;
-    } else if (h < 300) {
-        r = x; g = 0; b = c;
-    } else if (h < 360) {
-        r = c; g = 0; b = x;
-    }
-    r = Math.round((r + m) * 255);
-    g = Math.round((g + m) * 255);
-    b = Math.round((b + m) * 255);
-    return [r, g, b];
-    
+const PATTERNS = {
+    SOLID: new Solid(),
+    GRADIENT: new Gradient(),
 }
 
 function App() {
+    const [stat, setStat] = useState({type: "SOLID", data: {color: [0, 0, 0]}})
+    const [err, setErr] = useLifeSpan(3000, "");
+    useEffect(() => {
+        getStatus().then(setStat)
+    }, []);
 
-    const [hueCoord, hueEventProps, hueOverlayProps] = useSelectBar(0);
-    const [satCoord, satEventProps, satOverlayProps] = useSelectBar(500);
-    const [lightCoord, lightEventProps, lightOverlayProps] = useSelectBar(250);
+    const [cookies, _setFavs] = useCookies(["fav-patterns"]);
+    const setFavs = fs => _setFavs("fav-patterns", fs, {
+        expires: new Date(Date.now() + 10 * 3600000 * 24 * 365),
+    });
 
-    const hue = (360 * hueCoord) / 500;
-    const sat = (100 * satCoord) / 500;
-    const light = (100 * lightCoord) / 500;
+    const pattern = GetPattern(stat);
+    const favs = cookies["fav-patterns"] || [];
 
-    const sendColor = () => {
-        fetch(
-            "http://192.168.2.16:5000/status/",
-            {
-                method: "POST",
-                body: JSON.stringify({
-                    type: "SOLID",
-                    color: hslToRGB(hue, sat, light)
-                }),
-                headers: {
-                    "Content-Type": "application/json",
-                }
-            },
-        );
-    };
+    useEffect(() => {
+        if (favs["fav-patterns"] === undefined) {
+            setFavs([])
+        }
+    }, []);
 
     return <div className="App">
-
-        <div id="hsl-gradient" className="color-bar" {...hueEventProps}>
-            <div className="color-bar-select" style={{left: `${hueCoord}px`}}/>
-        </div><br/>
-        <div className="secret-overlay" {...hueOverlayProps} />
-
-        <div id="sat-gradient" className="color-bar" style={{
-            background: `linear-gradient(90deg, hsl(${hue}, 0%, ${light}%), hsl(${hue}, 100%, ${light}%))`
-        }} {...satEventProps}>
-            <div className="color-bar-select" style={{left: `${satCoord}px`}}/>
-        </div><br/>
-        <div className="secret-overlay" {...satOverlayProps}/>
-        <div id="lightness-gradient" className="color-bar" style={{
-            background: `linear-gradient(90deg, hsl(${hue}, ${sat}%, 0%), hsl(${hue}, ${sat}%, 50%), hsl(${hue}, 100%, 100%))`
-        }} {...lightEventProps}>
-            <div className="color-bar-select" style={{left: `${lightCoord}px`}}/>
-        </div><br/>
-        <div className="secret-overlay" {...lightOverlayProps}/>
-        <div id="preview" style={{background: `hsl(${hue}, ${sat}%, ${light}%)`}}/>
-        <button id="submit" onClick={sendColor}>Submit</button>
+        <div>
+            <label>
+                <input type="radio" checked={stat.type === "SOLID"} onClick={() => setStat({type: "SOLID", data:{color: [0, 0, 0]}})}/>
+                SOLID
+            </label>
+            <label>
+                <input type="radio" checked={stat.type === "GRADIENT"} onClick={() => setStat({type: "GRADIENT", data:{colors:[[0,0,0], [255, 0, 0]]}})}/>
+                GRADIENT
+            </label>
+        </div>
+        <div>
+            <pattern.Selection 
+                data={stat.data} 
+                update={data => setStat({
+                    type: pattern.type,
+                    data
+                })}
+            />
+            <pattern.PreviewBar data={stat.data} className="preview"/>
+        </div>
+        <button onClick={() => setStatus(stat).catch(reason => setErr(reason.message))}>Submit</button>
+        <button onClick={() => getStatus().then(setStat)}>Refresh</button>
+        <button onClick={() => setFavs(favs.concat([stat]))}>Add Favorite</button>
+        <h1>{err}</h1>
+        <FavList
+            favs={favs}
+            onChoose={i => {
+                setStat(favs[i]);
+            }}
+            onRemove={i => {
+                let fs = Array.from(favs)
+                fs.splice(i, 1);
+                setFavs(fs)
+            }}
+            />
     </div>;
 }
 
