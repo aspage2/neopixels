@@ -5,8 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"net/http"
-	"strings"
 	"sync"
+	"time"
 
 	"github.com/Jon-Bright/ledctl/pixarray"
 )
@@ -38,54 +38,6 @@ func Scale(c1 pixarray.Pixel, t float32) pixarray.Pixel {
 	}
 }
 
-type Artist interface {
-	Draw(*pixarray.PixArray)
-}
-
-type ArtistType string
-
-func (at ArtistType) Normalize() ArtistType {
-	return ArtistType(strings.ToUpper(string(at)))
-}
-
-const (
-	SOLID    ArtistType = "SOLID"
-	SEQUENCE ArtistType = "SEQUENCE"
-	GRADIENT ArtistType = "GRADIENT"
-)
-
-type Solid struct {
-	Color [3]int `json:"color"`
-}
-
-func (s *Solid) Draw(arr *pixarray.PixArray) {
-	arr.SetAll(color(s.Color[:]))
-}
-
-type Gradient struct {
-	Colors [][3]int `json:"colors"`
-}
-
-func (g *Gradient) Draw(arr *pixarray.PixArray) {
-	c1 := color(g.Colors[0][:])
-	c2 := color(g.Colors[1][:])
-	for i := 0; i < arr.NumPixels(); i++ {
-		t := float32(i) / float32(arr.NumPixels())
-		arr.SetOne(i, lerp(c1, c2, t))
-	}
-
-}
-
-type Sequence struct {
-	Colors [][3]int `json:"colors"`
-}
-
-func (seq *Sequence) Draw(arr *pixarray.PixArray) {
-	for i := 0; i < arr.NumPixels(); i++ {
-		c := seq.Colors[i%len(seq.Colors)][:]
-		arr.SetOne(i, color(c))
-	}
-}
 
 type Server struct {
 	arr *pixarray.PixArray
@@ -95,7 +47,10 @@ type Server struct {
 	artistMu   *sync.RWMutex
 	artistType ArtistType
 	artist     Artist
+
+	crossfade int
 }
+
 
 func (s *Server) Status(rw http.ResponseWriter, req *http.Request) {
 	defer req.Body.Close()
@@ -148,10 +103,29 @@ func (s *Server) Status(rw http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		a.Draw(s.arr)
-		s.arr.Write()
 		s.artistType = typ
 		s.artist = a
+		newPattern := make([]pixarray.Pixel, s.arr.NumPixels())
+		a.Draw(newPattern)
+
+		if s.crossfade > 0 {
+			old := s.arr.GetPixels()
+
+			const waitMs = 3
+
+			for t := 0; t < s.crossfade; t += waitMs {
+				for i := 0; i < len(old); i ++ {
+					s.arr.SetOne(i, lerp(old[i], newPattern[i], float32(t) / float32(s.crossfade)))
+				}
+				s.arr.Write()
+				time.Sleep(waitMs * time.Millisecond)
+			}
+		} else {
+			for i := 0; i < len(newPattern); i ++ {
+				s.arr.SetOne(i, newPattern[i])
+			}
+		}
+
 	}
 
 	json.NewEncoder(rw).Encode(envelope)
@@ -204,6 +178,7 @@ func main() {
 	numPixels := flag.Int("n", 30, "number of leds in the strip")
 	listenHost := flag.String("host", "127.0.0.1", "host ip to listen on")
 	listenPort := flag.Int("port", 4000, "port to listen on")
+	crossfadeMs := flag.Int("xfade", 300, "crossfade time between patterns in milliseconds")
 	order := flag.String("order", "grb", "color order for leds [rgb, grb]")
 	brightness := flag.Float64("brightness", 0.7, "max brightness of the LEDS")
 
@@ -228,9 +203,9 @@ func main() {
 		artist:     &Solid{Color: [3]int{0, 0, 0}},
 
 		order: *order,
+
+		crossfade: *crossfadeMs,
 	}
-	// s.artist.Draw(s.arr)
-	// s.arr.Write()
 
 	http.Handle("/status/", AllowMethods(
 		http.HandlerFunc(s.Status),

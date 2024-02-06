@@ -96,7 +96,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "host",
-				Value: "192.168.0.232",
+				Value: "192.168.1.74",
 			},
 			&cli.StringFlag{
 				Name:  "port",
@@ -191,11 +191,11 @@ func main() {
 				Usage: "merry xmas",
 				Action: func(ctx *cli.Context) error {
 					R := Color{0xff, 0, 0}
-					G := Color{0, 0xff, 0}
 					B := Color{0, 0, 0xff}
 					V := Color{0xff, 0, 0xff}
 					Y := Color{0xff, 0xff, 0}
-					seq := []Color{G, G, R, G, G, B, G, G, Y, G, G, V}
+					BL := Color{}
+					seq := []Color{R, R, BL, BL, BL, BL, B, B, BL, BL, BL, BL, Y, Y, BL, BL, BL, BL, V, V, BL, BL, BL, BL}
 
 					return Post("/status/", Must(MakePayload("SEQUENCE", map[string][]Color{"colors": seq})).([]byte))
 				},
