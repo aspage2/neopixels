@@ -142,17 +142,17 @@ func main() {
 				ArgsUsage: "colors to include",
 				Action: func(ctx *cli.Context) error {
 					args := ctx.Args()
-					c1, c1Err := colorFromString(args.Get(0))
-					if c1Err != nil {
-						return c1Err
-					}
-					c2, c2Err := colorFromString(args.Get(1))
-					if c2Err != nil {
-						return c2Err
+					var colors []Color
+					for i := 0; i < args.Len(); i ++ {
+						c, err := colorFromString(args.Get(i))
+						if err != nil {
+							return err
+						}
+						colors = append(colors, c)
 					}
 					envelope := struct {
-						Colors [2]Color `json:"colors"`
-					}{Colors: [2]Color{c1, c2}}
+						Colors []Color `json:"colors"`
+					}{Colors: colors}
 					payload := Must(MakePayload("SEQUENCE", envelope)).([]byte)
 					return Post("/status/", payload)
 				},

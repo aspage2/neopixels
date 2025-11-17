@@ -1,0 +1,54 @@
+.svslider {
+	position: relative;
+	display: inline-block;
+	touch-action: none;
+}
+
+.svslider > div.preview {
+	position: absolute;
+	border-radius: 50%;
+	border: 2px solid white;
+	box-shadow: 0 0 6px rgba(0,0,0,0.3);
+	pointer-events: none;
+}
+
+.svslider > canvas {
+	display: block;
+	border-radius: 8px;
+	border: 1px solid #333;
+	touch-action: none;
+}
+
+.svslider > div.selection {
+	position: absolute;
+	border-radius: 50%;
+	background: white;
+	border: 1px solid #333;
+	width: 10px;
+	height: 10px;
+}
+
+.hueslider {
+	position: relative;
+	display: inline-block;
+	touch-action: none;
+}
+
+.hueslider > div.selection {
+
+	width: 10px;
+	background: white;
+	position: absolute;
+	display: inline-block;
+	border: 2px solid grey;
+}
+
+.hueslider > div.preview {
+	position: absolute;
+	display: inline-block;
+	height: 30px;
+	width: 30px;
+	border-radius: 50%;
+	border: 2px solid grey;
+}
+
