@@ -1,28 +1,38 @@
-.rainbow-border {
-  position: relative;
-  padding: 0.6em 1.2em;
-  border: none;
-  background: #111;
-  color: white;
-  font-size: 1rem;
-  border-radius: 12px;
-  cursor: pointer;
-  z-index: 0;
+
+#header {
 }
 
-/* the rainbow border */
-.rainbow-border::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  padding: 2px; /* border thickness */
-  border-radius: inherit;
-  background: conic-gradient(from 0deg, red, yellow, lime, cyan, blue, magenta, red);
-  -webkit-mask: 
-    linear-gradient(#fff 0 0) content-box, 
-    linear-gradient(#fff 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  z-index: -1;
+.nav-link {
+	--bg: #1b1b1b;
+	--height: 40px;
+	display: inline-block;
+	width: 150px;
+	height: var(--height);
+	line-height: var(--height);
+	text-align: center;
+	color: white;
+	background: #1b1b1b;
+	text-decoration: none;
+	border-bottom: 2px solid var(--bg);
+	font-size: 1.1rem;
+	font-weight: bold;
+	box-sizing: border-box;
+	width: 50%;
 }
 
+.nav-link.active {
+	border-bottom: 2px solid violet;
+}
+
+
+@media (max-width: 500px) {
+	#root {
+		width: 100%;
+	}
+}
+
+@media (min-width: 500px) {
+	#root {
+		width: 500px;
+	}
+}

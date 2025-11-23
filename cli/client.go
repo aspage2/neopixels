@@ -56,7 +56,7 @@ func colorFromString(arg string) (Color, error) {
 
 func getUrl(path string) string {
 	path = strings.TrimLeft(path, "/")
-	return strings.TrimRight(HostBase, "/") + "/" + path
+	return strings.TrimRight(HostBase, "/") + "/api/" + path
 }
 
 func Post(path string, data []byte) error {
@@ -96,7 +96,7 @@ func main() {
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:  "host",
-				Value: "192.168.1.74",
+				Value: "leds.nwl",
 			},
 			&cli.StringFlag{
 				Name:  "port",

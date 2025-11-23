@@ -1,0 +1,13 @@
+
+.preset-page-content {
+	text-align: center;
+}
+
+
+.preset-page-button {
+	width: 48%;
+	box-sizing: border-box;
+	height: 70px;
+	margin-bottom: 5px;
+	font-size: 1.4rem;
+}

@@ -1,17 +1,22 @@
+import { Color } from "./colorutils";
 
-class Solid {
+export class Solid {
 	constructor(color) {
 		this.color = color;
 	}
 	getPattern() {
 		return {
 			type: "SOLID",
-			data: {color: this.color}
+			data: {color: this.color.rgb()}
 		};
+	}
+
+	static fromArr(rgb) {
+		return new Solid(Color.fromArr(rgb));
 	}
 }
 
-class Sequence {
+export class Sequence {
 	constructor(colors) {
 		this.colors = colors;
 	}
@@ -19,9 +24,12 @@ class Sequence {
 		return {
 			type: "SEQUENCE",
 			data: {
-				colors: this.colors,
+				colors: this.colors.map(c => c.rgb()),
 			}
 		};
+	}
+	static fromArrs(rgbs) {
+		return new Sequence(rgbs.map(Color.fromArr));
 	}
 }
 
