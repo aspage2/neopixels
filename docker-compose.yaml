@@ -1,0 +1,32 @@
+version: "3"
+services:
+  colorpicker:
+    build: color-picker
+    environment:
+      PROXY_ADDR: http://server:4000
+    ports:
+      - 5173:5173
+    entrypoint: 
+      - yarn
+      - dev
+      - --host
+    volumes:
+      - ./color-picker:/app
+  server:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    environment:
+      NEOPIXEL_FORWARD_ADDR: http://leds.nwl/api
+    command:
+      - -host=0.0.0.0
+      - -port=4000
+      - -order=rgb
+      - -n=50
+      - -brightness=80
+      - -xfade=200
+    develop:
+      watch:
+      - action: rebuild
+        path: ./server
+        target: /app/server

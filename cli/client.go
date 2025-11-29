@@ -16,6 +16,7 @@ import (
 )
 
 var HostBase string
+var APIPrefix string = ""
 
 func Must(v interface{}, err error) interface{} {
 	if err != nil {
@@ -56,11 +57,13 @@ func colorFromString(arg string) (Color, error) {
 
 func getUrl(path string) string {
 	path = strings.TrimLeft(path, "/")
-	return strings.TrimRight(HostBase, "/") + "/api/" + path
+	return strings.TrimRight(HostBase, "/") + APIPrefix + path
 }
 
 func Post(path string, data []byte) error {
-	resp, err := http.Post(getUrl(path), "application/json", bytes.NewReader(data))
+	u := getUrl(path)
+	fmt.Println(u)
+	resp, err := http.Post(u, "application/json", bytes.NewReader(data))
 	if err != nil {
 		return err
 	}
@@ -112,7 +115,7 @@ func main() {
 				Name:  "off",
 				Usage: "turn the leds off",
 				Action: func(cliCtx *cli.Context) error {
-					return Post("off/", []byte{})
+					return Post("/lights/off", []byte{})
 				},
 			},
 			{
@@ -133,7 +136,7 @@ func main() {
 						Colors [2]Color `json:"colors"`
 					}{Colors: [2]Color{c1, c2}}
 					payload := Must(MakePayload("GRADIENT", envelope)).([]byte)
-					return Post("/status/", payload)
+					return Post("/lights/status", payload)
 				},
 			},
 			{
@@ -143,7 +146,7 @@ func main() {
 				Action: func(ctx *cli.Context) error {
 					args := ctx.Args()
 					var colors []Color
-					for i := 0; i < args.Len(); i ++ {
+					for i := 0; i < args.Len(); i++ {
 						c, err := colorFromString(args.Get(i))
 						if err != nil {
 							return err
@@ -154,7 +157,7 @@ func main() {
 						Colors []Color `json:"colors"`
 					}{Colors: colors}
 					payload := Must(MakePayload("SEQUENCE", envelope)).([]byte)
-					return Post("/status/", payload)
+					return Post("/lights/status", payload)
 				},
 			},
 			{
@@ -171,14 +174,14 @@ func main() {
 						Color `json:"color"`
 					}{Color: c}
 					payload := Must(MakePayload("SOLID", envelope)).([]byte)
-					return Post("/status/", payload)
+					return Post("/lights/status", payload)
 				},
 			},
 			{
 				Name:  "get",
 				Usage: "get current status",
 				Action: func(ctx *cli.Context) error {
-					resp, err := Get("/status/")
+					resp, err := Get("/lights/status")
 					if err != nil {
 						return err
 					}
@@ -197,14 +200,14 @@ func main() {
 					BL := Color{}
 					seq := []Color{R, R, BL, BL, BL, BL, B, B, BL, BL, BL, BL, Y, Y, BL, BL, BL, BL, V, V, BL, BL, BL, BL}
 
-					return Post("/status/", Must(MakePayload("SEQUENCE", map[string][]Color{"colors": seq})).([]byte))
+					return Post("/lights/status", Must(MakePayload("SEQUENCE", map[string][]Color{"colors": seq})).([]byte))
 				},
 			},
 			{
 				Name:  "get-settings",
 				Usage: "get current settings",
 				Action: func(ctx *cli.Context) error {
-					resp, err := Get("/settings/")
+					resp, err := Get("/lights/settings")
 					if err != nil {
 						return err
 					}
@@ -213,6 +216,17 @@ func main() {
 				},
 			},
 		},
+	}
+	APIPrefix = os.Getenv("NEOPIXEL_API_PREFIX")
+	if APIPrefix == "" {
+		APIPrefix = "/"
+	} else {
+		if !strings.HasSuffix(APIPrefix, "/") {
+			APIPrefix += "/"
+		}
+		if !strings.HasPrefix(APIPrefix, "/") {
+			APIPrefix = "/" + APIPrefix
+		}
 	}
 	if err := app.Run(os.Args); err != nil {
 		log.Fatal(err)

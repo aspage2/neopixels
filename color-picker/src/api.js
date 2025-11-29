@@ -1,12 +1,12 @@
 
 export async function getStatus() {
-  const resp = await fetch("/api/status/");
+  const resp = await fetch("/api/lights/status");
   return await resp.json();
 }
 
 export function setStatus(data) {
 	return fetch(
-		"/api/status/",
+		"/api/lights/status",
 		{
 			method: "POST",
 			body: JSON.stringify(data),

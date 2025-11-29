@@ -4,7 +4,8 @@ import { Color } from './colorutils';
 import { ColorPreview, SVSlider, HueSlider } from './colorPicker';
 import { getStatus, setStatus } from './api';
 import { PresetPage } from './components/PresetPage';
-import { useNavigate, Routes, NavLink, Route, BrowserRouter } from 'react-router';
+import { useNavigate, Routes, Route, BrowserRouter } from 'react-router';
+import { Header} from "./components/Header";
 
 function setSolid(color) {
   return setStatus({
@@ -88,14 +89,13 @@ function App() {
 	function Rest() {
 	const navigate = useNavigate();
 	useEffect(() => navigate("/"), []);
-		return <><div id="header">
-			<NavLink index className={({isActive}) => isActive ? "nav-link active" : "nav-link"} to="/">Presets</NavLink>
-			<NavLink className={({isActive}) => isActive ? "nav-link active" : "nav-link"} to="/builder">Builder</NavLink>
-		</div>
-		<Routes>
-			<Route path="/" element={<PresetPage />}/>
-			<Route path="/builder" element={<Customizer />}/>
-		</Routes></>;
+		return <>
+			<Header />
+			<Routes>
+				<Route path="/" element={<PresetPage />}/>
+				<Route path="/builder" element={<Customizer />}/>
+			</Routes>
+		</>;
 	}
 	return <div id="root">
 		<BrowserRouter> 
