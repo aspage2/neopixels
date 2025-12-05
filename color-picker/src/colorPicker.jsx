@@ -1,6 +1,6 @@
 import "./colorPicker.css";
 import { useEffect, useRef, useState } from "react";
-import { Color, hsvToRgb, textColor, hex2RGB, rgb2Hex } from "./colorutils";
+import { Color, hsvToRgb, textColor, hex2RGB } from "./colorutils";
 
 function canvasDraw(canvas, hue, width, height) {
     const ctx = canvas.getContext("2d", {willReadFrequently: true});
@@ -293,10 +293,5 @@ export function ColorPreview({color, setColor=()=>{}}) {
 				}}
 			/>
   </div>
-}
-
-export function HexPreview({ color, editable=true }) {
-
-
 }
 

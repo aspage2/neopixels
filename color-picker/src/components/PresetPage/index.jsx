@@ -7,7 +7,7 @@ import { PresetButton } from "../PresetButton";
 import { setStatus } from "../../api";
 
 const PRESETS = {
-  "OFF": Solid.fromArr([0, 0, 0]),
+//  "OFF": Solid.fromArr([0, 0, 0]),
 	"\u{273F}": Solid.fromArr(hex2RGB("#586593")),
 	"Mintel": Solid.fromArr(hex2RGB("#fedb00")),
 	"BB <GO>": Solid.fromArr(hex2RGB("#FFA028")),

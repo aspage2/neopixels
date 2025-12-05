@@ -4,7 +4,7 @@ import { Color } from './colorutils';
 import { ColorPreview, SVSlider, HueSlider } from './colorPicker';
 import { getStatus, setStatus } from './api';
 import { PresetPage } from './components/PresetPage';
-import { useNavigate, Routes, Route, BrowserRouter } from 'react-router';
+import { Link, Routes, Route, BrowserRouter } from 'react-router';
 import { Header} from "./components/Header";
 
 function setSolid(color) {
@@ -85,15 +85,25 @@ function Customizer() {
 
 }
 
+function NotFound() {
+	return <>
+		<h1>Not Found</h1>
+		<p>The page you requested doesn't exist. The link below will take you to the application.</p>
+
+		<div className="home-link">
+			<Link to="/">Go Home</Link>
+		</div>
+	</>;
+}
+
 function App() {
 	function Rest() {
-	const navigate = useNavigate();
-	useEffect(() => navigate("/"), []);
 		return <>
 			<Header />
 			<Routes>
-				<Route path="/" element={<PresetPage />}/>
+				<Route index path="/" element={<PresetPage />}/>
 				<Route path="/builder" element={<Customizer />}/>
+				<Route path="*" element={<NotFound />}/>
 			</Routes>
 		</>;
 	}
