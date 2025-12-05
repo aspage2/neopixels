@@ -20,6 +20,7 @@ const PRESETS = {
 		[85, 0, 171],
 		[187, 0, 250]
 	]),
+	"Warm White 🎄": Solid.fromArr([244,187,113]),
 	"\u{1F341}": Sequence.fromArrs([
 		[218, 97, 21],
 		[218, 178, 52],
