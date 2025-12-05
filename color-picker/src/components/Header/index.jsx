@@ -22,7 +22,11 @@ export function Header() {
 				<NavLink 
 					className={({isActive}) => isActive ? "nav-link active" : "nav-link"} 
 					to="/builder"
-				>Builder</NavLink>
+				>Solid</NavLink>
+				<NavLink 
+					className={({isActive}) => isActive ? "nav-link active" : "nav-link"} 
+					to="/sequence"
+				>Sequence</NavLink>
 			</nav>
 	</div>;
 }

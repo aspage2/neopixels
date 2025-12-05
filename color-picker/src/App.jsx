@@ -6,6 +6,7 @@ import { getStatus, setStatus } from './api';
 import { PresetPage } from './components/PresetPage';
 import { Link, Routes, Route, BrowserRouter } from 'react-router';
 import { Header} from "./components/Header";
+import { SequenceBuilder } from "./components/SequenceBuilder";
 
 function setSolid(color) {
   return setStatus({
@@ -103,6 +104,7 @@ function App() {
 			<Routes>
 				<Route index path="/" element={<PresetPage />}/>
 				<Route path="/builder" element={<Customizer />}/>
+				<Route path="/sequence" element={<SequenceBuilder />}/>
 				<Route path="*" element={<NotFound />}/>
 			</Routes>
 		</>;

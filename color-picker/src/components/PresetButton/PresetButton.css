@@ -25,7 +25,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  padding: 2px; /* border thickness */
+  padding: 10px; /* border thickness */
 	background: var(--background-pattern);
   border-radius: inherit;
   -webkit-mask: 

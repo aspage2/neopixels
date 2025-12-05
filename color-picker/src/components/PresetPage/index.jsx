@@ -27,6 +27,14 @@ const PRESETS = {
 		[222, 1, 84],
 		[129, 83, 24]
 	]),
+	"🎄": Sequence.fromArrs([
+		[211,2,6],[39,161,0]
+	]),
+	"🕎": Sequence.fromArrs([
+		[218,178,52],
+		[4,8,176],
+		[190,190,190],
+	]),
 };
 
 export function PresetPage() {
